@@ -105,11 +105,17 @@ func (sb *SendBuf) AsyncSend() {
 	hasLengthSent := false
 	isMsgResend := false
 	var msg *pb.ConsOutMsg
-	tcpAddr, err := net.ResolveTCPAddr("tcp", sb.SendIP)
-	dialer := &net.Dialer{LocalAddr: tcpAddr}
-	if err != nil {
-		panic("wrong localaddr")
+	var dialer *net.Dialer
+	isLocalTest := sb.SendIP != sb.RcvIP
+
+	if isLocalTest {
+		tcpAddr, err := net.ResolveTCPAddr("tcp", sb.SendIP)
+		dialer = &net.Dialer{LocalAddr: tcpAddr}
+		if err != nil {
+			panic("wrong localaddr")
+		}
 	}
+
 	for {
 		//pop msg from buffer
 		if !isMsgResend {
@@ -149,12 +155,22 @@ func (sb *SendBuf) AsyncSend() {
 				//try reconnect
 				isMsgResend = true
 				for {
-					con, err := dialer.Dial("tcp", sb.RcvIP)
-					if err != nil {
-						time.Sleep(time.Millisecond * 200)
+					if isLocalTest {
+						con, err := dialer.Dial("tcp", sb.RcvIP)
+						if err != nil {
+							time.Sleep(time.Millisecond * 200)
+						} else {
+							sb.Con = con
+							break
+						}
 					} else {
-						sb.Con = con
-						break
+						con, err := net.Dial("tcp", sb.RcvIP+":12000")
+						if err != nil {
+							time.Sleep(time.Millisecond * 200)
+						} else {
+							sb.Con = con
+							break
+						}
 					}
 				}
 				continue
@@ -169,12 +185,22 @@ func (sb *SendBuf) AsyncSend() {
 			isMsgResend = true
 			hasLengthSent = true
 			for {
-				con, err := dialer.Dial("tcp", sb.RcvIP)
-				if err != nil {
-					time.Sleep(time.Millisecond * 200)
+				if isLocalTest {
+					con, err := dialer.Dial("tcp", sb.RcvIP)
+					if err != nil {
+						time.Sleep(time.Millisecond * 200)
+					} else {
+						sb.Con = con
+						break
+					}
 				} else {
-					sb.Con = con
-					break
+					con, err := net.Dial("tcp", sb.RcvIP+":12000")
+					if err != nil {
+						time.Sleep(time.Millisecond * 200)
+					} else {
+						sb.Con = con
+						break
+					}
 				}
 			}
 		} else {

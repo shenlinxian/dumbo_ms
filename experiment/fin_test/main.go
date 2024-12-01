@@ -24,6 +24,7 @@ type HbTest struct {
 	ID                int
 	N                 int    `yaml:"N"`
 	Fault             int    `yaml:"Fault"`
+	IsLocalTest       bool   `yaml:"IsLocalTest"`
 	NetWorkType       int    `yaml:"NetWorkType"`
 	Byz               bool   `yaml:"Byz"`
 	ByzRate           int    `yaml:"ByzRate"`
@@ -109,7 +110,7 @@ func main() {
 	hbTest.MyCallHelpCH = make(chan int, 100)
 	hbTest.AssitBlockFromOthersCH = make(chan pb.BlockInfo, 100)
 	hbTest.OthersCallHelpMsgCH = make(chan pb.ConsInMsg, hbTest.N*3)
-	hbTest.HbNet.Init(hbTest.ID, hbTest.N, hbTest.Fault, ipPath, hbTest.MaxSendBufferSize, 0, hbTest.MaxRcvBufferSize, 0, hbTest.MsgOutCH, hbTest.SafePriorityCH, hbTest.MyCallHelpCH, hbTest.AssitBlockFromOthersCH, hbTest.OthersCallHelpMsgCH)
+	hbTest.HbNet.Init(hbTest.ID, hbTest.N, hbTest.Fault, ipPath, hbTest.IsLocalTest, hbTest.MaxSendBufferSize, 0, hbTest.MaxRcvBufferSize, 0, hbTest.MsgOutCH, hbTest.SafePriorityCH, hbTest.MyCallHelpCH, hbTest.AssitBlockFromOthersCH, hbTest.OthersCallHelpMsgCH)
 	fmt.Println("end init network")
 
 	fmt.Println("Start running honeybadger consensus: n=", hbTest.N, "with network type", hbTest.NetWorkType)

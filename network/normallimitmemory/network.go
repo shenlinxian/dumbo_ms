@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -22,6 +23,7 @@ type NormalNetworkLimit struct {
 	otherIPs      []string //other ips that will dial me
 	IPd           []string //ips dial for
 	Cons          []chan net.Conn
+	IsLocalTest   bool
 	SendBuffer    []SendBuf
 	RcvBuffer     []RcvBuf
 	SendMsgCH     chan pb.ConsOutMsg
@@ -44,12 +46,13 @@ type NormalNetworkLimit struct {
 	InitWg sync.WaitGroup
 }
 
-func (pn *NormalNetworkLimit) Init(id int, num int, fault int, ippath string, maxsendbufsize int, maxsendbufferquantity int, maxrcvbufsize int, maxrcvbufferquantity int, sendmsgch chan pb.ConsOutMsg, safePriorityUpdateCH chan int, myCallHelpCH chan int, assistBlockOutCH chan pb.BlockInfo, callHelpMsgFromOthersCH chan pb.ConsInMsg) {
+func (pn *NormalNetworkLimit) Init(id int, num int, fault int, ippath string, isLocal bool, maxsendbufsize int, maxsendbufferquantity int, maxrcvbufsize int, maxrcvbufferquantity int, sendmsgch chan pb.ConsOutMsg, safePriorityUpdateCH chan int, myCallHelpCH chan int, assistBlockOutCH chan pb.BlockInfo, callHelpMsgFromOthersCH chan pb.ConsInMsg) {
 	pn.ID = id
 	pn.N = num
 	pn.Fault = fault
 	pn.Height = 0
 	pn.IPpath = ippath
+	pn.IsLocalTest = isLocal
 	//pn.IPs = ips
 	//pn.IPd = ipd
 	//pn.ServerIP = serviceip
@@ -100,20 +103,23 @@ func (pn *NormalNetworkLimit) ReadIPs() {
 		panic("wrong read ips")
 	}
 
-	ipPath = fmt.Sprintf("%sip%d/myips.txt", pn.IPpath, pn.ID)
-	myIpSrc := ReadIPs(ipPath, pn.N)
-	if myIpSrc == nil {
-		panic("wrong read ips")
+	if pn.IsLocalTest {
+		ipPath = fmt.Sprintf("%sip%d/myips.txt", pn.IPpath, pn.ID)
+		myIpSrc := ReadIPs(ipPath, pn.N)
+		if myIpSrc == nil {
+			panic("wrong read ips")
+		}
+
+		ipPath = fmt.Sprintf("%sip%d/otherips.txt", pn.IPpath, pn.ID)
+		otherIpSrc := ReadIPs(ipPath, pn.N)
+		if otherIpSrc == nil {
+			panic("wrong read ips")
+		}
+
+		pn.myIPs = myIpSrc
+		pn.otherIPs = otherIpSrc
 	}
 
-	ipPath = fmt.Sprintf("%sip%d/otherips.txt", pn.IPpath, pn.ID)
-	otherIpSrc := ReadIPs(ipPath, pn.N)
-	if otherIpSrc == nil {
-		panic("wrong read ips")
-	}
-
-	pn.myIPs = myIpSrc
-	pn.otherIPs = otherIpSrc
 	pn.IPd = ipDrt
 }
 
@@ -168,12 +174,24 @@ func (pn *NormalNetworkLimit) HandleConn() {
 		fmt.Println("A replica connected :" + tcpConn.RemoteAddr().String())
 
 		isIPMatch := false
+
 		for i := 0; i < pn.N; i++ {
-			if tcpConn.RemoteAddr().String() == pn.otherIPs[i] {
-				pn.Cons[i] <- tcpConn
-				isIPMatch = true
-				break
+			if pn.IsLocalTest {
+				if tcpConn.RemoteAddr().String() == pn.otherIPs[i] {
+					pn.Cons[i] <- tcpConn
+					isIPMatch = true
+					break
+				}
+			} else {
+				tcpAddr := tcpConn.RemoteAddr().String()
+				ip := strings.Split(tcpAddr, ":")[0]
+				if ip == pn.IPd[i] {
+					pn.Cons[i] <- tcpConn
+					isIPMatch = true
+					break
+				}
 			}
+
 		}
 		if !isIPMatch {
 			fmt.Println("Unknown node connected", tcpConn.RemoteAddr())
@@ -193,24 +211,43 @@ func (pn *NormalNetworkLimit) InitSendBuf() {
 		go func(id int) {
 			defer sbwg.Done()
 			for {
-				tcpAddr, err := net.ResolveTCPAddr("tcp", pn.myIPs[id-1])
-				dialer := &net.Dialer{LocalAddr: tcpAddr}
-				if err != nil {
-					panic("wrong localaddr")
-				}
-				conn, err := dialer.Dial("tcp", pn.IPd[id-1])
-				fmt.Println("Dialing ", pn.IPd[id-1])
-				if err != nil {
-					//conn.Close()
-					fmt.Println("err when init senfbuf", err)
-					time.Sleep(time.Millisecond * 900)
+				if pn.IsLocalTest {
+					tcpAddr, err := net.ResolveTCPAddr("tcp", pn.myIPs[id-1])
+					dialer := &net.Dialer{LocalAddr: tcpAddr}
+					if err != nil {
+						panic("wrong localaddr")
+					}
+					conn, err := dialer.Dial("tcp", pn.IPd[id-1])
+					fmt.Println("Dialing ", pn.IPd[id-1])
+					if err != nil {
+						//conn.Close()
+						fmt.Println("err when init senfbuf", err)
+						time.Sleep(time.Millisecond * 900)
+					} else {
+						fmt.Println("Dial ", pn.IPd[id-1], "done")
+						//init responding send buf
+						pn.SendBuffer[id-1] = *NewSendBuff(pn.ID, id, pn.N, pn.myIPs[id-1], pn.IPd[id-1], pn.MaxSendBufferSize/pn.N, pn.MaxSendBufferQuantity, pn.SubSendMsgCHs[id-1], conn)
+						go pn.SendBuffer[id-1].Start()
+						break
+					}
 				} else {
-					fmt.Println("Dial ", pn.IPd[id-1], "done")
-					//init responding send buf
-					pn.SendBuffer[id-1] = *NewSendBuff(pn.ID, id, pn.N, pn.myIPs[id-1], pn.IPd[id-1], pn.MaxSendBufferSize/pn.N, pn.MaxSendBufferQuantity, pn.SubSendMsgCHs[id-1], conn)
-					go pn.SendBuffer[id-1].Start()
-					break
+					ipAddr := pn.IPd[id-1] + ":12000"
+					conn, err := net.Dial("tcp", ipAddr)
+					fmt.Println("Dialing ", pn.IPd[id-1])
+					if err != nil {
+						//conn.Close()
+						fmt.Println("err when init senfbuf", err)
+						time.Sleep(time.Millisecond * 900)
+					} else {
+						fmt.Println("Dial ", pn.IPd[id-1], "done")
+						//init responding send buf
+						pn.SendBuffer[id-1] = *NewSendBuff(pn.ID, id, pn.N, pn.IPd[id-1], pn.IPd[id-1], pn.MaxSendBufferSize/pn.N, pn.MaxSendBufferQuantity, pn.SubSendMsgCHs[id-1], conn)
+						go pn.SendBuffer[id-1].Start()
+						break
+					}
+
 				}
+
 			}
 		}(i)
 	}
