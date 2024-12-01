@@ -1,0 +1,17 @@
+N: 4
+Fault : 1
+NetWorkType : 1 # 1: normal 2: normal with limited memory 3: safety memory
+Byz :  true
+ByzRate : 50
+ByzTarget : 4
+EnableMemProtect : true
+Priority : 0
+BatchSize: 100
+TXSize : 250
+MaxSendBufferSize      : 200
+MaxSendBufferQuantity  : 100
+MaxRcvBufferSize       : 200
+MaxRcvBufferQuantity     : 100
+IpPath : /src/dumbo_ms/config/ip/
+LogFile : /src/dumbo_ms/log
+DBPath : /src/dumbo_ms/database/hbdb

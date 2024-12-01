@@ -1,0 +1,27 @@
+syntax = "proto3";   
+package struct;
+//protoc --go_out=. *.proto
+option go_package = "./";
+
+
+
+
+message FinMessage{
+    int32 MsgType =1; //1: rbc 2: rbc with finish 3: aba
+    
+    int32 ID=3;
+    int32 RcvID=5;
+    int32 Round=7;
+    //rbc info
+    int32 Leader=9;
+    int32 RBCType=11; //1 for ready 2 for echo
+    int32 Msglen=13;
+    bytes Root=17;//store root
+    repeated bytes Values=19;//store path
+    //aba info
+    int32 BARound=21;
+    int32 Loop=22;
+    int32 BAType=23;
+    bool Value=25;
+    repeated bool ConfValue=27;
+}

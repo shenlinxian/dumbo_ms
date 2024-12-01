@@ -1,0 +1,17 @@
+syntax = "proto3";   
+package struct;
+//protoc --go_out=. *.proto
+option go_package = "./";
+
+message ProtoMsg{
+    int32 SenderID=1;
+    int32 RcverID=2;
+    int32 Priority=4;
+    int32 Type=5;  //1: consensus msg  2: callhelp msg  3: assist msg
+    bytes Content=6;
+}
+
+
+
+
+
