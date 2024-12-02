@@ -15,6 +15,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -169,18 +170,44 @@ func (hbtest *HbTest) HandleConsOutMsgNormal() {
 }
 
 func (hbtest *HbTest) HandleConsOutMsgWithAttack() {
+	firsttime := true
 	for {
 		msg := <-hbtest.ConsMsgOutCH
 		hbtest.MsgOutCH <- msg
 		if msg.RevID != hbtest.ByzTarget {
 			continue
 		}
-		msg.Priority += 10000
+		if firsttime {
+			firsttime = false
+			hbtest.Attack()
+		}
+		/*msg.Priority += 10000
 		for i := 0; i < hbtest.ByzRate; i++ {
 			msg.Priority++
 			hbtest.MsgOutCH <- msg
-		}
+		}*/
 	}
+}
+
+func (hbtest *HbTest) Attack() {
+	fakaContent := make([]byte, 1024*1024)
+	attackMsg := pb.ConsOutMsg{
+		SendID:   hbtest.ID,
+		RevID:    hbtest.ByzTarget,
+		Priority: 0,
+		Content:  string(fakaContent),
+		Type:     1,
+	}
+	count := 10000
+	for {
+		for i := 0; i < hbtest.ByzRate; i++ {
+			attackMsg.Priority = count
+			hbtest.MsgOutCH <- attackMsg
+			count++
+		}
+		time.Sleep(time.Millisecond * 100)
+	}
+
 }
 
 // call for all miss blocks below than safePriority

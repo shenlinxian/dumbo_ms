@@ -59,7 +59,7 @@ func main() {
 	flag.Parse()
 	id := *idf
 
-	fmt.Println("running test for honeybadger with id=", id)
+	fmt.Println("running test for fin with id=", id)
 	fmt.Println("start loading configure file")
 	gopath := os.Getenv("GOPATH")
 	readBytes, err := os.ReadFile(gopath + "/src/dumbo_ms/config/configure.yaml")
@@ -113,7 +113,7 @@ func main() {
 	hbTest.HbNet.Init(hbTest.ID, hbTest.N, hbTest.Fault, ipPath, hbTest.IsLocalTest, hbTest.MaxSendBufferSize, 0, hbTest.MaxRcvBufferSize, 0, hbTest.MsgOutCH, hbTest.SafePriorityCH, hbTest.MyCallHelpCH, hbTest.AssitBlockFromOthersCH, hbTest.OthersCallHelpMsgCH)
 	fmt.Println("end init network")
 
-	fmt.Println("Start running honeybadger consensus: n=", hbTest.N, "with network type", hbTest.NetWorkType)
+	fmt.Println("Start running fin consensus: n=", hbTest.N, "with network type", hbTest.NetWorkType)
 	if hbTest.Byz && hbTest.ID <= hbTest.Fault {
 		fmt.Println("Attack on", hbTest.ByzTarget, "with rate", hbTest.ByzRate)
 	}
