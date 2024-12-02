@@ -37,7 +37,7 @@ def wait_for_conf_values(*, pid, N, f, epoch, conf_sent, bin_values,
     conf_sent[epoch][tuple(values)] = True
     logger.debug(f"broadcast {('CONF', epoch, tuple(values))}",
                  extra={'nodeid': pid, 'epoch': epoch})
-    filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
+    #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
     #with open(filename, 'a', encoding='utf-8') as file:
     #    file.write('inside consensus binaryagreement multicast conf' + "\n")
     broadcast(('CONF', epoch, tuple(bin_values[epoch])))
@@ -164,7 +164,7 @@ def binaryagreement(sid, pid, N, f, coin, input, decide, broadcast, receive):
                 bv_signal.set()
 
             elif msg[0] == 'CONF':
-                filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
+                #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
                 #with open(filename, 'a', encoding='utf-8') as file:
                 #    file.write('inside consensus binaryagreement receive a  conf message' + "\n")
                 handle_conf_messages(
@@ -195,7 +195,7 @@ def binaryagreement(sid, pid, N, f, coin, input, decide, broadcast, receive):
 
         if not est_sent[r][est]:
             est_sent[r][est] = True
-            filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
+            #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
             #with open(filename, 'a', encoding='utf-8') as file:
             #    file.write('inside consensus binaryagreement multicast est' + "\n")
             broadcast(('EST', r, est))
@@ -258,7 +258,7 @@ def binaryagreement(sid, pid, N, f, coin, input, decide, broadcast, receive):
                 bv_signal=bv_signal,
                 broadcast=broadcast,
             )
-        filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
+        #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
         #with open(filename, 'a', encoding='utf-8') as file:
         #    coinlog="inside consensus binaryagreement try to get coin"
         #    file.write(coinlog + "\n")
@@ -274,7 +274,7 @@ def binaryagreement(sid, pid, N, f, coin, input, decide, broadcast, receive):
         s = coin(r)
         logger.info(f'Received coin with value = {s}',
                     extra={'nodeid': pid, 'epoch': r})
-        filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
+        #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
         #with open(filename, 'a', encoding='utf-8') as file:
         #    coinlog="inside consensus binaryagreement got coin"
         #    file.write(coinlog + "\n")
@@ -303,7 +303,7 @@ def set_new_estimate(*, values, s, already_decided, decide,pid):
         if v == s:
             if already_decided is None:
                 already_decided = v
-                filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
+                #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
                 #with open(filename, 'a', encoding='utf-8') as file:
                 #    file.write('inside consensus binaryagreement done' + "\n")
                 decide(v)

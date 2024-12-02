@@ -172,7 +172,7 @@ def reliablebroadcast(sid, pid, N, f, leader, input, receive, send):
 
     """
     
-    filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
+    #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
     #with open(filename, 'a', encoding='utf-8') as file:
     #    file.write('inside consensus reliablebroadcast' + "\n")
         
@@ -300,7 +300,7 @@ def reliablebroadcast(sid, pid, N, f, leader, input, receive, send):
                 broadcast(('READY', roothash))
 
             if len(ready[roothash]) >= OutputThreshold and echoCounter[roothash] >= K:
-                filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
+                #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
                 #with open(filename, 'a', encoding='utf-8') as file:
                 #    file.write('inside consensus reliablebroadcast finished' + "\n")
                 return decode_output(roothash)

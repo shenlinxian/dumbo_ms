@@ -17,7 +17,7 @@ def commonsubset(pid, N, f, rbc_out, aba_in, aba_out):
         string
     """
     
-    filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
+    #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (pid)
     #with open(filename, 'a', encoding='utf-8') as file:
     #    file.write('inside consensus commonsubset' + "\n")
     assert len(rbc_out) == N

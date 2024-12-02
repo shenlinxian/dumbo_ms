@@ -91,7 +91,7 @@ class HoneyBadgerBFT():
         :param tx: Transaction to append to the buffer.
         """
         #print('submit_tx', self.pid, tx)
-        filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (self.pid)
+        #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (self.pid)
         #with open(filename, 'a', encoding='utf-8') as file:
         #    file.write('submit an transaction' + "\n")
         self.transaction_buffer.append(tx)
@@ -99,7 +99,7 @@ class HoneyBadgerBFT():
     def run(self):
         """Run the HoneyBadgerBFT protocol."""
 
-        filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (self.pid)
+        #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (self.pid)
         #with open(filename, 'a', encoding='utf-8') as file:
         #    file.write('inside consensus run' + "\n")
             
@@ -198,7 +198,7 @@ class HoneyBadgerBFT():
             :param int j: Node index for which the setup is being done.
             """
             
-            filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (self.pid)
+            #filename="/home/luy/golang_projects/src/dumbo_ms/log/data%d.json" % (self.pid)
             #with open(filename, 'a', encoding='utf-8') as file:
             #    file.write('inside consensus set up' + "\n")
             def coin_bcast(o):
