@@ -160,7 +160,7 @@ func (pn *NormalNetwork) HandlePriorities() {
 func (pn *NormalNetwork) HandleConn() {
 	fmt.Println("start listen ip:", pn.IPd[pn.ID-1])
 	var tcpAddr *net.TCPAddr
-	tcpAddr, _ = net.ResolveTCPAddr("tcp", pn.IPd[pn.ID-1])
+	tcpAddr, _ = net.ResolveTCPAddr("tcp", pn.IPd[pn.ID-1]+":12000")
 	tcpListener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
 		panic(err)
