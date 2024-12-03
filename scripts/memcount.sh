@@ -10,9 +10,9 @@ while true; do
         break
     fi
 
-    CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
+    CURRENT_TIME=$(date "%H:%M:%S")
 
-    echo "$CURRENT_TIME - PID: $PID - Memory Usage: $MEM_USAGE bytes" >> memorylog.txt
+    echo "$CURRENT_TIME - Memory Usage: $MEM_USAGE" >> memorylog.txt
 
     sleep 1
 done
