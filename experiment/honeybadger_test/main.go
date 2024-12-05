@@ -13,6 +13,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+
+	//"net/http"
+	//_ "net/http/pprof"
 	"os"
 	"strconv"
 	"time"
@@ -55,6 +58,11 @@ type HbTest struct {
 }
 
 func main() {
+
+	//go func() {
+	//	http.ListenAndServe("localhost:9090", nil)
+	//}()
+
 	var idf = flag.Int("id", 0, "-id")
 	flag.Parse()
 	id := *idf
@@ -112,12 +120,16 @@ func main() {
 	hbTest.HbNet.Init(hbTest.ID, hbTest.N, hbTest.Fault, ipPath, hbTest.IsLocalTest, hbTest.MaxSendBufferSize, 0, hbTest.MaxRcvBufferSize, 0, hbTest.MsgOutCH, hbTest.SafePriorityCH, hbTest.MyCallHelpCH, hbTest.AssitBlockFromOthersCH, hbTest.OthersCallHelpMsgCH)
 	fmt.Println("end init network")
 
-	fmt.Println("Start running honeybadger consensus: n=", hbTest.N)
+	hbTest.HbLog.Info(fmt.Sprintf("Start running honeybadger consensus: n=%d", hbTest.N))
 	//generate input
 	hbTest.InputCH = make(chan []byte, 50)
 	go hbTest.GenerateInput()
 	go hbTest.HandleConsOutMsg()
 	//loop for consensus runing
+	var startTime time.Time
+	var initTime time.Time
+	startTime = time.Now()
+	var txCount int = 0
 	for {
 		roundPriority := hbTest.Priority
 		var hb hb.HBConsensus
@@ -133,6 +145,7 @@ func main() {
 
 		//wait for jump signal or consensus ends
 		breakSignal := false
+		var txRound int
 		for {
 			select {
 			case safePriority := <-hbTest.SafePriorityCH:
@@ -141,6 +154,7 @@ func main() {
 					breakSignal = true
 				}
 			case result := <-resultCH:
+				txCount = len(result.Content) / hbTest.BatchSize
 				hbTest.DBBlockCH <- pb.BlockInfo{Priority: result.Priority, Content: result.Content}
 				hbTest.Priority++
 				breakSignal = true
@@ -151,6 +165,20 @@ func main() {
 		}
 		fmt.Println("Finished round:", hbTest.Priority)
 		hbTest.HbLog.Info(fmt.Sprintln("Finished round:", hbTest.Priority))
+		endTime := time.Now()
+		duration := endTime.Sub(startTime)
+		hbTest.HbLog.Info(fmt.Sprintf("round latency: %.2f second\n", duration.Seconds()))
+
+		if hbTest.Priority == 2 {
+			initTime = endTime
+		} else if hbTest.Priority > 2 {
+			timeCount := endTime.Sub(initTime)
+			hbTest.HbLog.Info(fmt.Sprintf("all latency: %.2f second\n", timeCount.Seconds()/(float64(hbTest.Priority)-2)))
+			txCount += txRound
+			hbTest.HbLog.Info(fmt.Sprintf("all throughput: %d tx/sec\n", txCount/int(timeCount.Seconds())))
+		}
+
+		startTime = endTime
 	}
 }
 
@@ -179,7 +207,7 @@ func (hbtest *HbTest) HandleConsOutMsgWithAttack() {
 		}
 		if firsttime {
 			firsttime = false
-			hbtest.Attack()
+			go hbtest.Attack()
 		}
 		/*msg.Priority += 10000
 		for i := 0; i < hbtest.ByzRate; i++ {
@@ -205,7 +233,7 @@ func (hbtest *HbTest) Attack() {
 			hbtest.MsgOutCH <- attackMsg
 			count++
 		}
-		time.Sleep(time.Millisecond * 100)
+		time.Sleep(time.Second)
 	}
 
 }
