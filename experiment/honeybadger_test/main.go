@@ -311,17 +311,23 @@ func ReadIPs(path string, num int) []string {
 func (hb *HbTest) GenerateInput() {
 	i := 0
 	for {
-		id1 := strconv.Itoa(i)
-		id2 := strconv.Itoa(hb.ID)
-		txs := []byte(id1 + id2)
-		var tx []byte
-		if len := len(txs); len < hb.TXSize {
-			padding := make([]byte, hb.TXSize-len)
-			tx = append(txs, padding...)
-		} else {
-			tx = txs[len-hb.TXSize:]
+		var txBlock []byte
+		for j := 0; j < hb.BatchSize; j++ {
+			id1 := strconv.Itoa(i)
+			id2 := strconv.Itoa(hb.ID)
+			txs := []byte(id1 + id2)
+			var tx []byte
+			if len := len(txs); len < hb.TXSize {
+				padding := make([]byte, hb.TXSize-len)
+				tx = append(txs, padding...)
+			} else {
+				tx = txs[len-hb.TXSize:]
+			}
+			txBlock = append(txBlock, tx...)
+			i++
 		}
-		hb.InputCH <- tx
+
+		hb.InputCH <- txBlock
 	}
 
 }

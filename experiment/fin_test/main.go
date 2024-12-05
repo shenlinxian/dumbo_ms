@@ -314,20 +314,26 @@ func ReadIPs(path string, num int) []string {
 
 }
 
-func (fin *HbTest) GenerateInput() {
+func (hb *HbTest) GenerateInput() {
 	i := 0
 	for {
-		id1 := strconv.Itoa(i)
-		id2 := strconv.Itoa(fin.ID)
-		txs := []byte(id1 + id2)
-		var tx []byte
-		if len := len(txs); len < fin.TXSize {
-			padding := make([]byte, fin.TXSize-len)
-			tx = append(txs, padding...)
-		} else {
-			tx = txs[len-fin.TXSize:]
+		var txBlock []byte
+		for j := 0; j < hb.BatchSize; j++ {
+			id1 := strconv.Itoa(i)
+			id2 := strconv.Itoa(hb.ID)
+			txs := []byte(id1 + id2)
+			var tx []byte
+			if len := len(txs); len < hb.TXSize {
+				padding := make([]byte, hb.TXSize-len)
+				tx = append(txs, padding...)
+			} else {
+				tx = txs[len-hb.TXSize:]
+			}
+			txBlock = append(txBlock, tx...)
+			i++
 		}
-		fin.InputCH <- tx
+
+		hb.InputCH <- txBlock
 	}
 
 }
