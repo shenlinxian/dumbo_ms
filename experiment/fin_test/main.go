@@ -160,7 +160,7 @@ func main() {
 					breakSignal = true
 				}
 			case result := <-resultCH:
-				txCount = len(result.Content) / hbTest.BatchSize
+				txRound = len(result.Content) / hbTest.TXSize
 				hbTest.DBBlockCH <- pb.BlockInfo{Priority: result.Priority, Content: result.Content}
 				hbTest.Priority++
 				breakSignal = true
