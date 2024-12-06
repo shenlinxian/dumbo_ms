@@ -19,10 +19,10 @@ from honeybadgerbft.core.honeybadger import HoneyBadgerBFT
 
     
 def run_honeybadger(N,f,i,r,input):
-    filename="/home/ubuntu/golang/src/dumbo_ms/log/data%d.json" % (i)
-    with open(filename, 'a', encoding='utf-8') as file:
-        m="inside honeybadger BFT consensus %d %d %d %d \n" % (N,f,i,r)
-        file.write(m)
+    #filename="/home/ubuntu/golang/src/dumbo_ms/log/data%d.json" % (i)
+    #with open(filename, 'a', encoding='utf-8') as file:
+    #    m="inside honeybadger BFT consensus %d %d %d %d \n" % (N,f,i,r)
+    #    file.write(m)
     #recv_queue=Queue()
     
     def send(j,o):
@@ -60,9 +60,9 @@ def run_honeybadger(N,f,i,r,input):
     hb.submit_tx(input)
             
     #gevent.spawn(recv_net)
-    with open(filename, 'a', encoding='utf-8') as file:
+    #with open(filename, 'a', encoding='utf-8') as file:
     # 在末尾追加 JSON 数据（每次追加一个 JSON 对象）
-        file.write('start running honeybadger BFT consensus' + "\n")
+    #    file.write('start running honeybadger BFT consensus' + "\n")
     
     out = hb.run()
     serialized_ot=pickle.dumps(out)
@@ -70,9 +70,9 @@ def run_honeybadger(N,f,i,r,input):
     cons_msg_out={"sendid":i,"revid":-1,"priority":r,"content":encoded_data,"type":1}
     print(json.dumps(cons_msg_out),flush=True)
 
-    with open(filename, 'a', encoding='utf-8') as file:
+    #with open(filename, 'a', encoding='utf-8') as file:
     # 在末尾追加 JSON 数据（每次追加一个 JSON 对象）
-        file.write('get output of honeybadger BFT consensus' + "\n")
+    #    file.write('get output of honeybadger BFT consensus' + "\n")
     
     return
 

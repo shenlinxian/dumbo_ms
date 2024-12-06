@@ -145,14 +145,15 @@ class HoneyBadgerBFT():
             send_r = _make_send(r)
             recv_r = self._per_round_recv[r].get
             new_tx = self._run_round(r, tx_to_send[0], send_r, recv_r)
+            return new_tx
             #print('new_tx:', new_tx)
 
             # Remove all of the new transactions from the buffer
-            self.transaction_buffer = [_tx for _tx in self.transaction_buffer if _tx not in new_tx]
+            #self.transaction_buffer = [_tx for _tx in self.transaction_buffer if _tx not in new_tx]
 
-            self.round += 1     # Increment the round
-            if self.round >= self.K:
-                break   # Only run one round for now
+            #self.round += 1     # Increment the round
+            #if self.round >= self.K:
+            #    break   # Only run one round for now
 
     def _run_round(self, r, tx_to_send, send, recv):
         """Run one protocol round.
