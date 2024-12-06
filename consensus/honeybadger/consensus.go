@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"strconv"
 )
@@ -36,10 +35,10 @@ func (hb *HBConsensus) Run(consMsgIn chan pb.ConsInMsg, consMsgOut chan pb.ConsO
 	hb.MsgOutCH = consMsgOut
 	hb.OutputCH = result
 	//start python
-	gopath := os.Getenv("GOPATH")
+	//gopath := os.Getenv("GOPATH")
 
 	inputStr := base64.StdEncoding.EncodeToString(input)
-	cmd := exec.Command("python3", gopath+"/src/dumbo_ms/consensus/honeybadger/HoneyBadgerBFT/singlerun.py", strconv.Itoa(hb.Num), strconv.Itoa(hb.Fault), strconv.Itoa(hb.ID-1), strconv.Itoa(hb.Priority), inputStr)
+	cmd := exec.Command("python3", "./../../consensus/honeybadger/HoneyBadgerBFT/singlerun.py", strconv.Itoa(hb.Num), strconv.Itoa(hb.Fault), strconv.Itoa(hb.ID-1), strconv.Itoa(hb.Priority), inputStr)
 
 	fmt.Println("execute command:", cmd)
 	stdin, err := cmd.StdinPipe()
@@ -121,7 +120,8 @@ func (hb *HBConsensus) handleMsgInCH(stdin io.WriteCloser) {
 
 func (hb *HBConsensus) handleMsgOutCH(stdout io.ReadCloser) {
 	scanner := bufio.NewScanner(stdout)
-
+	const maxTokenSize = 10 * 1024 * 1024 // 10 MB
+	scanner.Buffer(make([]byte, maxTokenSize), maxTokenSize)
 	for {
 		select {
 		case <-hb.Close:
