@@ -57,7 +57,7 @@ def run_honeybadger(N,f,i,r,input):
                 gevent.sleep(0.0001)
     
     hb=HoneyBadgerBFT('sid',i,N,f,send,recv,r)
-    hb.submit_tx(input)
+    hb.submit_tx(input*4000)
             
     #gevent.spawn(recv_net)
     #with open(filename, 'a', encoding='utf-8') as file:
