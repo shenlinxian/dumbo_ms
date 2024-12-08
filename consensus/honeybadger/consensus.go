@@ -120,7 +120,7 @@ func (hb *HBConsensus) handleMsgInCH(stdin io.WriteCloser) {
 
 func (hb *HBConsensus) handleMsgOutCH(stdout io.ReadCloser) {
 	scanner := bufio.NewScanner(stdout)
-	const maxTokenSize = 10 * 1024 * 1024 // 10 MB
+	const maxTokenSize = 500 * 1024 * 1024 // 10 MB
 	scanner.Buffer(make([]byte, maxTokenSize), maxTokenSize)
 	for {
 		select {
