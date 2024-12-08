@@ -10,7 +10,7 @@ while true; do
         break
     fi
 
-    CURRENT_TIME=$(date "%H:%M:%S")
+    CURRENT_TIME=$(date +'%T')
 
     echo "$CURRENT_TIME - Memory Usage: $MEM_USAGE" >> memorylog.txt
 
