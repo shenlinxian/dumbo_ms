@@ -20,6 +20,7 @@ type SendBuf struct {
 	RcvIP        string
 	Capacity     int
 	Volume       int
+	MemUse       int //mem useage now
 	Con          net.Conn
 	Buf          []pb.ConsOutMsg
 	BufLock      sync.RWMutex
@@ -39,6 +40,7 @@ func NewSendBuff(myid int, sbid int, num int, sendIP string, rcvip string, capac
 		RcvIP:        rcvip,
 		Capacity:     capacity,
 		Volume:       volume,
+		MemUse:       0,
 		Con:          con,
 		Buf:          make([]pb.ConsOutMsg, 0),
 		MaxPriority:  0,
@@ -80,11 +82,20 @@ func (sb *SendBuf) Push(msg pb.ConsOutMsg) {
 	sb.BufLock.Lock()
 	defer sb.BufLock.Unlock()
 	//fmt.Println("push a message")
+	sb.MemUse += len(msg.Content) + 56
 	sb.Buf = append(sb.Buf, msg)
 	sort.Slice(sb.Buf, func(i, j int) bool { return sb.Buf[i].Priority < sb.Buf[j].Priority })
 	if size := len(sb.Buf); size > sb.Capacity {
 		sb.Buf = sb.Buf[size-sb.Capacity:]
 	}
+
+	for sb.MemUse > sb.Volume {
+		firstElement := sb.Buf[0]
+		firstElementSize := len(firstElement.Content) + 56
+		sb.Buf = sb.Buf[1:]
+		sb.MemUse -= firstElementSize
+	}
+
 }
 
 func (sb *SendBuf) Pop() *pb.ConsOutMsg {
@@ -96,6 +107,7 @@ func (sb *SendBuf) Pop() *pb.ConsOutMsg {
 		popmsg := sb.Buf[0]
 		sb.Buf = sb.Buf[1:]
 		//fmt.Println("pop a message")
+		sb.MemUse -= len(popmsg.Content) + 56
 		return &popmsg
 	}
 }
@@ -224,6 +236,7 @@ type RcvBuf struct {
 	N        int
 	Capacity int //max quantity of messages
 	Volume   int //max size of memory usage to store all messages
+	MemUse   int //mem useage now
 
 	Buf                     []pb.ConsInMsg //Buf[0] store msg with max priority
 	BufLock                 sync.RWMutex
@@ -248,6 +261,7 @@ func NewRcvBuff(myid int, rbid int, num int, capacity int, volume int, netConns 
 		N:                     num,
 		Capacity:              capacity,
 		Volume:                volume,
+		MemUse:                0,
 		Buf:                   buf,
 		MaxPriority:           -1,
 		NetCon:                netConns,
@@ -389,10 +403,20 @@ func (rb *RcvBuf) Push(msg pb.ConsInMsg) {
 	if rb.RegisterCH.Priority == msg.Priority {
 		rb.RegisterCH.MshCH <- msg
 	} else if msg.Priority > rb.RegisterCH.Priority {
+
+		rb.MemUse += len(msg.Content) + 56
+
 		rb.Buf = append(rb.Buf, msg)
 		sort.Slice(rb.Buf, func(i, j int) bool { return rb.Buf[i].Priority < rb.Buf[j].Priority })
 		if size := len(rb.Buf); size > rb.Capacity {
 			rb.Buf = rb.Buf[size-rb.Capacity:]
+		}
+
+		for rb.MemUse > rb.Volume {
+			firstElement := rb.Buf[0]
+			firstElementSize := len(firstElement.Content) + 56
+			rb.Buf = rb.Buf[1:]
+			rb.MemUse -= firstElementSize
 		}
 	}
 }
@@ -405,6 +429,7 @@ func (rb *RcvBuf) RegisterMsgCHByPriority(priority int, consInMsgCH chan pb.Cons
 	rb.RegisterCH = MsgCHwithPriority{Priority: priority, MshCH: consInMsgCH}
 	cutIndex := 0
 	for i, msg := range rb.Buf {
+		rb.MemUse -= len(msg.Content) + 56
 		if msg.Priority == priority {
 			cutIndex = i
 			consInMsgCH <- msg

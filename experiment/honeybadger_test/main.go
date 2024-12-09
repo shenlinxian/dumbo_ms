@@ -24,23 +24,25 @@ import (
 )
 
 type HbTest struct {
-	ID                int
-	N                 int    `yaml:"N"`
-	Fault             int    `yaml:"Fault"`
-	IsLocalTest       bool   `yaml:"IsLocalTest"`
-	NetWorkType       int    `yaml:"NetWorkType"`
-	Byz               bool   `yaml:"Byz"`
-	ByzRate           int    `yaml:"ByzRate"`
-	ByzTarget         int    `yaml:"ByzTarget"`
-	EnableMemProtect  bool   `yaml:"EnableMemProtect"`
-	Priority          int    `yaml:"Priority"`
-	BatchSize         int    `yaml:"BatchSize"`
-	TXSize            int    `yaml:"TXSize"`
-	IpPath            string `yaml:"IpPath"`
-	LogFile           string `yaml:"LogFile"`
-	DBPath            string `yaml:"DBPath"`
-	MaxSendBufferSize int    `yaml:"MaxSendBufferSize"`
-	MaxRcvBufferSize  int    `yaml:"MaxRcvBufferSize"`
+	ID                    int
+	N                     int    `yaml:"N"`
+	Fault                 int    `yaml:"Fault"`
+	IsLocalTest           bool   `yaml:"IsLocalTest"`
+	NetWorkType           int    `yaml:"NetWorkType"`
+	Byz                   bool   `yaml:"Byz"`
+	ByzRate               int    `yaml:"ByzRate"`
+	ByzTarget             int    `yaml:"ByzTarget"`
+	EnableMemProtect      bool   `yaml:"EnableMemProtect"`
+	Priority              int    `yaml:"Priority"`
+	BatchSize             int    `yaml:"BatchSize"`
+	TXSize                int    `yaml:"TXSize"`
+	IpPath                string `yaml:"IpPath"`
+	LogFile               string `yaml:"LogFile"`
+	DBPath                string `yaml:"DBPath"`
+	MaxSendBufferSize     int    `yaml:"MaxSendBufferSize"`
+	MaxRcvBufferSize      int    `yaml:"MaxRcvBufferSize"`
+	MaxSendBufferQuantity int    `yaml:"MaxSendBufferQuantity"`
+	MaxRcvBufferQuantity  int    `yaml:"MaxRcvBufferQuantity"`
 
 	HbLog log.MsLog
 	HbDB  db.MsDB
@@ -117,7 +119,7 @@ func main() {
 	hbTest.MyCallHelpCH = make(chan int, 100)
 	hbTest.AssitBlockFromOthersCH = make(chan pb.BlockInfo, 100)
 	hbTest.OthersCallHelpMsgCH = make(chan pb.ConsInMsg, hbTest.N*3)
-	hbTest.HbNet.Init(hbTest.ID, hbTest.N, hbTest.Fault, ipPath, hbTest.IsLocalTest, hbTest.MaxSendBufferSize, 0, hbTest.MaxRcvBufferSize, 0, hbTest.MsgOutCH, hbTest.SafePriorityCH, hbTest.MyCallHelpCH, hbTest.AssitBlockFromOthersCH, hbTest.OthersCallHelpMsgCH)
+	hbTest.HbNet.Init(hbTest.ID, hbTest.N, hbTest.Fault, ipPath, hbTest.IsLocalTest, hbTest.MaxSendBufferSize, hbTest.MaxSendBufferQuantity, hbTest.MaxRcvBufferSize, hbTest.MaxRcvBufferQuantity, hbTest.MsgOutCH, hbTest.SafePriorityCH, hbTest.MyCallHelpCH, hbTest.AssitBlockFromOthersCH, hbTest.OthersCallHelpMsgCH)
 	fmt.Println("end init network")
 
 	hbTest.HbLog.Info(fmt.Sprintf("Start running honeybadger consensus: n=%d", hbTest.N))

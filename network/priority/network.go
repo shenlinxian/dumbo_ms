@@ -160,7 +160,12 @@ func (pn *PriorityNetwork) HandlePriorities() {
 func (pn *PriorityNetwork) HandleConn() {
 	fmt.Println("start listen ip:", pn.IPd[pn.ID-1])
 	var tcpAddr *net.TCPAddr
-	tcpAddr, _ = net.ResolveTCPAddr("tcp", pn.IPd[pn.ID-1]+":12000")
+
+	if pn.IsLocalTest {
+		tcpAddr, _ = net.ResolveTCPAddr("tcp", pn.IPd[pn.ID-1])
+	} else {
+		tcpAddr, _ = net.ResolveTCPAddr("tcp", pn.IPd[pn.ID-1]+":12000")
+	}
 	tcpListener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
 		panic(err)
@@ -263,7 +268,7 @@ func (pn *PriorityNetwork) InitRcvBuf() {
 		rbwg.Add(1)
 		go func(id int) {
 			defer rbwg.Done()
-			pn.RcvBuffer[id-1] = *NewRcvBuff(pn.ID, id, pn.N, pn.MaxRcvBufferSize/pn.N, pn.MaxRcvBufferQuantity, pn.Cons[id-1], pn.PrioritiesOutCH, pn.AssistMsgFromOthersCH, pn.CallHelpMsgFromOthersCH)
+			pn.RcvBuffer[id-1] = *NewRcvBuff(pn.ID, id, pn.N, pn.MaxRcvBufferSize/pn.N, pn.MaxRcvBufferQuantity/pn.N, pn.Cons[id-1], pn.PrioritiesOutCH, pn.AssistMsgFromOthersCH, pn.CallHelpMsgFromOthersCH)
 			go pn.RcvBuffer[id-1].Start()
 		}(i)
 	}
