@@ -41,7 +41,16 @@ func (bcf *BC_f) handle_msgin() {
 	//fmt.Println("rbc", bcf.lid, ":", "inside handle_msgin")
 	var rbcmsg pb.RBCMsg
 	for {
-		rbcmsg = <-bcf.msgIn
+		select {
+		case <-bcf.close:
+			return
+		default:
+			select {
+			case <-bcf.close:
+				return
+			case rbcmsg = <-bcf.msgIn:
+			}
+		}
 		if rbcmsg.Round != (bcf.round) {
 			panic("get a rbcmsg with wrong round")
 		}

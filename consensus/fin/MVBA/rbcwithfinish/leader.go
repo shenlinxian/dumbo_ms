@@ -38,8 +38,18 @@ func (bcl *BC_l) handle_msgin() {
 	//fmt.Println("leader: inside handle_msgin")
 	var rbcmsg pb.RBCMsg
 	for {
+		select {
+		case <-bcl.close:
+			return
+		default:
+			select {
+			case <-bcl.close:
+				return
+			case rbcmsg = <-bcl.msgIn:
+			}
+		}
 
-		rbcmsg = <-bcl.msgIn
+		//rbcmsg = <-bcl.msgIn
 		if rbcmsg.Round != (bcl.round) {
 			panic("get a rbcmsg with wrong round")
 		}
