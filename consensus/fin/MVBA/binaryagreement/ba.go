@@ -203,6 +203,7 @@ func (ba *BA) Launch() {
 				continue
 			}
 			<-ba.close
+			close(loopinfo.close)
 			return
 		}
 	}
