@@ -171,6 +171,7 @@ func main() {
 				break
 			}
 		}
+		close(roundClose)
 		fmt.Println("Finished round:", hbTest.Priority)
 		hbTest.HbLog.Info(fmt.Sprintln("Finished round:", hbTest.Priority))
 		endTime := time.Now()
