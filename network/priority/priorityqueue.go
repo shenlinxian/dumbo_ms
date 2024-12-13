@@ -142,7 +142,7 @@ func (sb *SendBuf) AsyncSend() {
 				msg = sb.Pop()
 				//fmt.Println("pop a message to send")
 				if msg == nil {
-					time.Sleep(time.Millisecond * 500)
+					time.Sleep(time.Millisecond * 50)
 					continue
 				}
 			}
