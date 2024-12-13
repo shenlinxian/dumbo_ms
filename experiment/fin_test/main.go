@@ -158,6 +158,8 @@ func main() {
 			select {
 			case safePriority := <-hbTest.SafePriorityCH:
 				if safePriority > roundPriority+1 {
+
+					hbTest.HbLog.Info(fmt.Sprintln("Wait for help"))
 					hbTest.Priority = hbTest.CallHelp(safePriority) + 1
 					breakSignal = true
 				}
