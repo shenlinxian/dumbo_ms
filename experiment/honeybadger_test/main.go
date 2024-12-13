@@ -177,7 +177,7 @@ func main() {
 			timeCount := endTime.Sub(initTime)
 			hbTest.HbLog.Info(fmt.Sprintf("all latency: %.2f second\n", timeCount.Seconds()/(float64(hbTest.Priority)-2)))
 			txCount += txRound
-			hbTest.HbLog.Info(fmt.Sprintf("all throughput: %d tx/sec\n", txCount/int(timeCount.Seconds())))
+			hbTest.HbLog.Info(fmt.Sprintf("all throughput: %.2f tx/sec\n", float64(txCount)/(float64(timeCount)/float64(time.Second))))
 		}
 
 		startTime = endTime
