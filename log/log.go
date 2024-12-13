@@ -14,7 +14,7 @@ func (mslog *MsLog) Init(path string) {
 	if err != nil {
 		panic(err)
 	}
-	log.Logger = log.Output(logFile).With().Timestamp().Logger()
+	log.Logger = log.Output(logFile)
 
 }
 
