@@ -227,7 +227,7 @@ func (hbtest *HbTest) HandleConsOutMsgWithAttack() {
 }
 
 func (hbtest *HbTest) Attack() {
-	fakaContent := make([]byte, 1024*1024)
+	fakaContent := make([]byte, 1024*1024*hbtest.ByzRate)
 	attackMsg := pb.ConsOutMsg{
 		SendID:   hbtest.ID,
 		RevID:    hbtest.ByzTarget,
@@ -237,11 +237,10 @@ func (hbtest *HbTest) Attack() {
 	}
 	count := 10000
 	for {
-		for i := 0; i < hbtest.ByzRate; i++ {
-			attackMsg.Priority = count
-			hbtest.MsgOutCH <- attackMsg
-			count++
-		}
+		attackMsg.Priority = count
+		hbtest.MsgOutCH <- attackMsg
+		count++
+
 		time.Sleep(time.Second)
 	}
 

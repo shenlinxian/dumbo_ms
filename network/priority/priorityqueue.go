@@ -265,7 +265,7 @@ func NewRcvBuff(myid int, rbid int, num int, capacity int, volume int, netConns 
 		Buf:                   buf,
 		MaxPriority:           -1,
 		NetCon:                netConns,
-		ProtoMsgIn:            make(chan pb.ConsInMsg, capacity),
+		ProtoMsgIn:            make(chan pb.ConsInMsg, 100),
 		RegisterCH:            MsgCHwithPriority{-1, nil},
 		MaxPriorityOutCH:      maxPriorityOutCH,
 		WaitingAssistPriority: -1,
@@ -392,18 +392,20 @@ func (rb *RcvBuf) HandleProtoMsg() {
 }
 
 func (rb *RcvBuf) Push(msg pb.ConsInMsg) {
-	rb.BufLock.Lock()
-	defer rb.BufLock.Unlock()
 
 	if msg.Priority > rb.MaxPriority {
 		rb.MaxPriority = msg.Priority
 		rb.MaxPriorityOutCH <- pb.MaxPrioritywithID{rb.RbID, msg.Priority}
 	}
 
+	if msg.Priority < rb.MaxPriority-3 {
+		return
+	}
 	if rb.RegisterCH.Priority == msg.Priority {
 		rb.RegisterCH.MshCH <- msg
 	} else if msg.Priority > rb.RegisterCH.Priority {
-
+		rb.BufLock.Lock()
+		defer rb.BufLock.Unlock()
 		rb.MemUse += len(msg.Content) + 56
 
 		rb.Buf = append(rb.Buf, msg)
