@@ -254,18 +254,18 @@ type RcvBuf struct {
 
 // init
 func NewRcvBuff(myid int, rbid int, num int, capacity int, volume int, netConns chan net.Conn, maxPriorityOutCH chan pb.MaxPrioritywithID, assistMsgCH chan pb.AssistMsg, callHelpMsgCH chan pb.ConsInMsg) *RcvBuf {
-	buf := make([]pb.ConsInMsg, 0)
+	fmt.Println("init rcvbuf with mid", myid, "rid", rbid, "cap", capacity, "vol", volume)
 	return &RcvBuf{
-		MyID:                  myid,
-		RbID:                  rbid,
-		N:                     num,
-		Capacity:              capacity,
-		Volume:                volume,
-		MemUse:                0,
-		Buf:                   buf,
+		MyID:     myid,
+		RbID:     rbid,
+		N:        num,
+		Capacity: capacity,
+		Volume:   volume,
+		MemUse:   0,
+		//Buf:                   buf,
 		MaxPriority:           -1,
 		NetCon:                netConns,
-		ProtoMsgIn:            make(chan pb.ConsInMsg, 100),
+		ProtoMsgIn:            make(chan pb.ConsInMsg, 10),
 		RegisterCH:            MsgCHwithPriority{-1, nil},
 		MaxPriorityOutCH:      maxPriorityOutCH,
 		WaitingAssistPriority: -1,
@@ -431,9 +431,9 @@ func (rb *RcvBuf) RegisterMsgCHByPriority(priority int, consInMsgCH chan pb.Cons
 	rb.RegisterCH = MsgCHwithPriority{Priority: priority, MshCH: consInMsgCH}
 	cutIndex := 0
 	for i, msg := range rb.Buf {
-		rb.MemUse -= len(msg.Content) + 56
 		if msg.Priority == priority {
-			cutIndex = i
+			rb.MemUse -= len(msg.Content) + 56
+			cutIndex = i + 1
 			consInMsgCH <- msg
 		} else if msg.Priority > priority {
 			break

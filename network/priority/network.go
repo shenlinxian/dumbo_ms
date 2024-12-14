@@ -231,7 +231,7 @@ func (pn *PriorityNetwork) InitSendBuf() {
 					} else {
 						fmt.Println("Dial ", pn.IPd[id-1], "done")
 						//init responding send buf
-						pn.SendBuffer[id-1] = *NewSendBuff(pn.ID, id, pn.N, pn.myIPs[id-1], pn.IPd[id-1], pn.MaxSendBufferSize/pn.N, pn.MaxSendBufferQuantity, pn.SubSendMsgCHs[id-1], conn)
+						pn.SendBuffer[id-1] = *NewSendBuff(pn.ID, id, pn.N, pn.myIPs[id-1], pn.IPd[id-1], pn.MaxSendBufferSize/pn.N, pn.MaxSendBufferQuantity/pn.N, pn.SubSendMsgCHs[id-1], conn)
 						go pn.SendBuffer[id-1].Start()
 						break
 					}
