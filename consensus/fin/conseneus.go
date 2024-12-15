@@ -62,10 +62,10 @@ func (fin *Fin) Run(consMsgIn chan pb.ConsInMsg, consMsgOut chan pb.ConsOutMsg, 
 
 	done := make(chan bool)
 
-	fakedone := make(chan bool)
+	//fakedone := make(chan bool)
 
 	ctoutputsCH := make(chan pb.RBCOut, fin.Num)
-	go fin.start_ctrbcs(input, ctoutputsCH, fakedone)
+	go fin.start_ctrbcs(input, ctoutputsCH, done)
 
 	ctrbcoutputs := make([]bool, fin.Num)
 	ctrbcoutputscontent := make([][]byte, fin.Num)
@@ -101,7 +101,7 @@ func (fin *Fin) Run(consMsgIn chan pb.ConsInMsg, consMsgOut chan pb.ConsOutMsg, 
 	time.Sleep(time.Millisecond * 100)
 	//start sigfreemvba
 
-	fmt.Println("start a new signature free mvba of round", fin.Priority)
+	//fmt.Println("start a new signature free mvba of round", fin.Priority)
 
 	mvba2order := make(chan []byte, 2)
 	mvba := sfm.New_mvba(fin.Num, 1, fin.ID, fin.Priority, fin.RBCFMsgOutCH, fin.BAMsgOutCH, fin.RBCFMsgCH, fin.BAMsgCH, mvbainput, check_input_rbc, mvba2order, ctrbcoutputs)
@@ -109,7 +109,7 @@ func (fin *Fin) Run(consMsgIn chan pb.ConsInMsg, consMsgOut chan pb.ConsOutMsg, 
 	go mvba.Launch()
 
 	output := <-mvba2order
-	fmt.Println("done a mvba of round ", fin.Priority)
+	//fmt.Println("done a mvba of round ", fin.Priority)
 
 	fin.wait_rbc_done(output, ctrbcoutputs)
 
@@ -132,7 +132,7 @@ func (fin *Fin) Run(consMsgIn chan pb.ConsInMsg, consMsgOut chan pb.ConsOutMsg, 
 
 	result <- pb.BlockInfo{Priority: fin.Priority, Content: jsonData}
 
-	fmt.Println("output:", outputbools)
+	//fmt.Println("output:", outputbools)
 }
 
 func (fin *Fin) MsgRouter() {

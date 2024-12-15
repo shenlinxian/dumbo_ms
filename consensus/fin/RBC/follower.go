@@ -90,6 +90,7 @@ type candidate struct {
 func (bcf *BC_f) Start() {
 	//fmt.Println(bcf.nid, "start broadcast follower ", bcf.nid, bcf.lid, bcf.sid)
 	close := make(chan bool)
+	defer SafeClose(close)
 	go bcf.handle_msgin(close)
 	valbuf := make(chan pb.RBCMsg)
 	oldechobuf := make(chan pb.RBCMsg)
@@ -119,18 +120,49 @@ func (bcf *BC_f) Start() {
 	go bcf.handle_ready(bcf.height, readysignal, outputsignal, oldreadybuf, readybuf, close)
 
 	//fmt.Println("lid", bcf.lid, "wait ready")
-	readyroot := <-readysignal
+	var readyroot []byte
+	select {
+	case <-bcf.done:
+		return
+	default:
+		select {
+		case <-bcf.done:
+			return
+		case readyroot = <-readysignal:
+		}
+	}
 	//fmt.Println("lid", bcf.lid, "send ready")
 	//send ready
 	go bcf.send_ready(bcf.height, readyroot)
 	//output
 
 	//fmt.Println("lid", bcf.lid, "wait output")
-	outroot := <-outputsignal
-
+	var outroot []byte
+	select {
+	case <-bcf.done:
+		return
+	default:
+		select {
+		case <-bcf.done:
+			return
+		case outroot = <-outputsignal:
+		}
+	}
 	//fmt.Println("lid", bcf.lid, "done")
 	for {
-		cand := <-candidateCH
+
+		var cand candidate
+		select {
+		case <-bcf.done:
+			return
+		default:
+			select {
+			case <-bcf.done:
+				return
+			case cand = <-candidateCH:
+			}
+		}
+
 		if bytes.Equal(outroot, cand.root) {
 			bcf.output <- pb.RBCOut{cand.output, bcf.lid}
 			//fmt.Println("generate an output of height:", bcf.height)
@@ -139,7 +171,6 @@ func (bcf *BC_f) Start() {
 			panic("wrong leader")
 		}
 	}
-	SafeClose(close)
 
 }
 
