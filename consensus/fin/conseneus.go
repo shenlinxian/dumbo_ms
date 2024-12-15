@@ -5,7 +5,7 @@ import (
 	rbc "dumbo_ms/consensus/fin/RBC"
 	pb "dumbo_ms/structure"
 	"encoding/json"
-	"fmt"
+	//"fmt"
 	"time"
 
 	"google.golang.org/protobuf/proto"
