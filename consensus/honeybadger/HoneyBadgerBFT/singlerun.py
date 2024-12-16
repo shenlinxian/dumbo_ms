@@ -18,7 +18,7 @@ from honeybadgerbft.core.honeybadger import HoneyBadgerBFT
 #from honeybadgerbft.crypto.threshenc import tpke
 
     
-def run_honeybadger(N,f,i,r,input):
+def run_honeybadger(N,f,i,r,b,input):
     #filename="/home/ubuntu/golang/src/dumbo_ms/log/data%d.json" % (i)
     #with open(filename, 'a', encoding='utf-8') as file:
     #    m="inside honeybadger BFT consensus %d %d %d %d \n" % (N,f,i,r)
@@ -57,8 +57,11 @@ def run_honeybadger(N,f,i,r,input):
                 gevent.sleep(0.0001)
     
     hb=HoneyBadgerBFT('sid',i,N,f,send,recv,r)
-    hb.submit_tx(input*4000)
-            
+    hb.submit_tx(input*b)
+    #input_data = sys.stdin.readline().strip()
+    #hb.submit_tx(input_data)
+    #with open(filename, 'a', encoding='utf-8') as file:
+    #    file.write('get input')
     #gevent.spawn(recv_net)
     #with open(filename, 'a', encoding='utf-8') as file:
     # 在末尾追加 JSON 数据（每次追加一个 JSON 对象）
@@ -81,5 +84,6 @@ if __name__ == '__main__':
     byz = int(sys.argv[2])
     id = int(sys.argv[3])
     r = int(sys.argv[4])
-    input= sys.argv[5]
-    run_honeybadger(n,byz,id,r,input)
+    batch = int(sys.argv[5])
+    input= sys.argv[6]
+    run_honeybadger(n,byz,id,r,batch,input)

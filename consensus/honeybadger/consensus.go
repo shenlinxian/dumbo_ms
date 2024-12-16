@@ -37,9 +37,10 @@ func (hb *HBConsensus) Run(consMsgIn chan pb.ConsInMsg, consMsgOut chan pb.ConsO
 	//start python
 	//gopath := os.Getenv("GOPATH")
 
-	inputStr := base64.StdEncoding.EncodeToString(input)
-	cmd := exec.Command("python3", "./../../consensus/honeybadger/HoneyBadgerBFT/singlerun.py", strconv.Itoa(hb.Num), strconv.Itoa(hb.Fault), strconv.Itoa(hb.ID-1), strconv.Itoa(hb.Priority), inputStr)
-
+	batch := len(input) / 250
+	inputStr := base64.StdEncoding.EncodeToString(input[:250])
+	//cmd := exec.Command("python3", "./../../consensus/honeybadger/HoneyBadgerBFT/singlerun.py", strconv.Itoa(hb.Num), strconv.Itoa(hb.Fault), strconv.Itoa(hb.ID-1), strconv.Itoa(hb.Priority), inputStr)
+	cmd := exec.Command("python3", "./../../consensus/honeybadger/HoneyBadgerBFT/singlerun.py", strconv.Itoa(hb.Num), strconv.Itoa(hb.Fault), strconv.Itoa(hb.ID-1), strconv.Itoa(hb.Priority), strconv.Itoa(batch), inputStr)
 	fmt.Println("execute command:", cmd)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -58,7 +59,11 @@ func (hb *HBConsensus) Run(consMsgIn chan pb.ConsInMsg, consMsgOut chan pb.ConsO
 		return
 	}
 	//}()
-
+	/*_, err = stdin.Write([]byte(inputStr))
+	if err != nil {
+		fmt.Println("Error write input:", err)
+		return
+	}*/
 	go hb.handleMsgInCH(stdin)
 	go hb.handleMsgOutCH(stdout)
 
