@@ -35,6 +35,9 @@ type HbTest struct {
 	Byz                   bool   `yaml:"Byz"`
 	ByzRate               int    `yaml:"ByzRate"`
 	ByzTarget             int    `yaml:"ByzTarget"`
+	CrashNumer            int    `yaml:"CrashNumer"`
+	Crash                 bool   `yaml:"Crash"`
+	CrashTime             int    `yaml:"CrashTime"`
 	EnableMemProtect      bool   `yaml:"EnableMemProtect"`
 	Priority              int    `yaml:"Priority"`
 	BatchSize             int    `yaml:"BatchSize"`
@@ -87,6 +90,13 @@ func main() {
 	}
 	hbTest.ID = id
 	fmt.Println("end loading configure file")
+
+	go func() {
+		if hbTest.Crash && hbTest.ID <= hbTest.CrashNumer {
+			time.Sleep(time.Second * time.Duration(hbTest.CrashTime))
+			os.Exit(0)
+		}
+	}()
 
 	//init channel
 
